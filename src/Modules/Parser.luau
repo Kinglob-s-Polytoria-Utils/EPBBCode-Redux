@@ -2,6 +2,15 @@
 local Types = require("./Types.luau")
 local Enums = require("./Enums.luau")
 
-local Parser = {}
+local function Reject(Reason: Types.Reason): nil
+	print(string.format("[EPBBText > Parser]: %s", Reason))
+	return Reason
+end
+
+local Parser: Types.ParserProperties = {} :: Types.ParserProperties
+
+function Parser.ParseRaw(TokenizedText: Types.TokenizedText): (Types.Success, Types.ParsedText?, Types.MetadataMap?, Types.Reason?)
+	return false, nil, nil Reject("Failed to parse tokenized input.")
+end
 
 return Parser

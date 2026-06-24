@@ -9,8 +9,15 @@ type MetadataEnum		= number
 type TokenEnum			= number
 type SegmentEnum		= number
 type FolderOfImages	= Folder
-type Reason					= string
-type Success				= boolean
+
+export type Reason					= string
+export type Success					= boolean
+
+export type ParsedText			= {Segment}
+export type TokenizedText		= {Token}
+
+export type Metadata				= BoundFunctions | BoundImages | BoundImageSequences | BoundEvents
+export type MetadataMap			= {[MetadataEnum]: Metadata}
 
 --[Types for validity checks]--
 export type ValidFunction		= PTFunction | PTCallback | () -> any
@@ -58,14 +65,19 @@ export type Segment = {
 	BindName:				string?
 }
 
---[Binder Type]--
-
 --[Lexer Type]--
+export type LexerProperties	= {
+	--[Methods]--
+	Lex: (RawText: RawText) -> (Success, TokenizedText?, Reason?),
+}
 
 --[Parser Type]--
+export type ParserProperties	= {
+	--[Methods]--
+	ParseRaw: (TokenizedText: TokenizedText) -> (Success, ParsedText?, MetadataMap? Reason?),
+}
 
 --[EPBBText Property types]--
-export type EPBBTextMetadata	= {[MetadataEnum]: Metadata}
 export type ParsedText				= {Segment}
 export type RawText						= string
 
@@ -75,14 +87,14 @@ export type EPBBTextProperties = {
 	Raw: RawText,
 
 	--[Private]--
-	read Metadata: EPBBTextMetadata,	
-	read Parsed:		ParsedText,
+	Metadata:	MetadataMap,	
+	Parsed:		ParsedText,
 
 	--[Methods]--
 	--[Public]--
-	New:			 (Raw: RawText)																-> (EPBBTextProperties, Success, Reason?),
-	UpdateRaw: (self: EPBBTextProperties, Raw: RawText)			-> (EPBBTextProperties, Success, Reason?),
-	Out:			 (self: EPBBTextProperties, Label: UILabel)		-> (CallBack: () -> (string, Success, Reason?)),
+	New:			 (Raw: RawText)																-> (Success, EPBBTextProperties?, Reason?),
+	UpdateRaw: (self: EPBBTextProperties, Raw: RawText)			-> (Success, EPBBTextProperties?, Reason?),
+	Out:			 (self: EPBBTextProperties, Label: UILabel)		-> (CallBack: () -> (Success, string?, Reason?)),
 	Bind:			 (
 		self: EPBBTextProperties,
 		Enum: MetadataEnum,
