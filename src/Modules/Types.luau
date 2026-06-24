@@ -68,13 +68,13 @@ export type Segment = {
 --[Lexer Type]--
 export type LexerProperties	= {
 	--[Methods]--
-	Lex: (RawText: RawText) -> (Success, TokenizedText?, Reason?),
+	Tokenize: (RawText: RawText) -> (Success, TokenizedText?, Reason?),
 }
 
 --[Parser Type]--
 export type ParserProperties	= {
 	--[Methods]--
-	ParseRaw: (TokenizedText: TokenizedText) -> (Success, ParsedText?, MetadataMap? Reason?),
+	Parse: (TokenizedText: TokenizedText) -> (Success, ParsedText?, MetadataMap? Reason?),
 }
 
 --[EPBBText Property types]--

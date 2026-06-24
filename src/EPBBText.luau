@@ -9,7 +9,27 @@ local function Reject(Reason: Types.Reason): nil
 	return Reason
 end
 
-local EPBBCode: Types.EPBBCodeProperties = {} :: Types.EPBBCodeProperties
-EPBBCode.__index = EPBBCode
+local EPBBText: Types.EPBBTextProperties = {} :: Types.EPBBTextProperties
+EPBBText.__index = EPBBText
 
-return EPBBCode
+function EPBBText.New(Raw: Types.RawText): (Success, EPBBTextProperties?, Reason?)
+	local self = setmetatable({}, EPBBText)
+
+	self.RawText: Types.RawText = Raw or ""
+	local 
+		TokenizationSuccess: Types.Success,
+		TokenizedText: Types.TokenizedText? 
+	= Lexer.Tokenize(self.RawText)
+	if not TokenizationSuccess then return false, nil, Reject("Failed to tokenize the input raw text.")
+
+	local 
+		ParseSuccess: Types.Success,
+		ParsedText: Types.ParsedText?,
+		MetadataMap: Types.MetadataMap?
+	= Parser.Parse(TokenizedText)
+	if not ParseSuccess then return false, nil, nil, Reject("Failed to parse tokenized text.")
+
+	return true, self	
+end
+
+return EPBBText

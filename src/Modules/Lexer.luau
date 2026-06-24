@@ -9,7 +9,7 @@ end
 
 local Lexer: Types.LexerProperties = {} :: Types.LexerProperties
 
-function Lexer.Lex(RawText: Types.RawText): (Types.Success, Types.TokenizedText?, Types.Reason?)
+function Lexer.Tokenize(RawText: Types.RawText): (Types.Success, Types.TokenizedText?, Types.Reason?)
 	return false, nil, Reject("Failed to tokenize input RawText. Preventing all further operations in this class.")
 end
 
