@@ -8,7 +8,6 @@ type FolderOfImages	= Folder
 export type ColumnNumber		= number
 export type RowNumber			= number
 
-
 export type MetadataEnum = {
 	Function: number,
 	Event: number,
@@ -18,12 +17,14 @@ export type MetadataEnum = {
 
 export type TokenEnum = {
 	Text: number,
+	Offset_Text: number,
 	BB_Tag: number,
 	EPBB_Tag: number,
 }
 
 export type SegmentEnum = {
-	Character: number,
+	Text: number,
+	Offset_Text: number,
 	BB_Open: number,
 	BB_Close: number,
 	EPBB_Open: number,
@@ -53,11 +54,11 @@ export type ValidEvent			= BindableEvent | NetworkEvent | PTSignal
 export type ValidMetadata		= BoundImage | BoundImageSequence | BoundEvent | BoundFunction
 
 --[Definitions for the tokenizer]--
-Types.BB_Open				= "["
-Types.BB_Close			= "[/"
+Types.BB_Open				= "[.]"
+Types.BB_Close			= "[/.]"
 
-Types.EPBB_Open			= "<"
-Types.EPBB_Close		= "</"
+Types.EPBB_Open			= "<.>"
+Types.EPBB_Close		= "</.>"
 
 Types.Function			= "func"
 Types.Event					= "event"
@@ -92,7 +93,8 @@ export type BoundEvents = {[RowNumber]: {[ColumnNumber]: BoundEvent}}
 
 --[Custom data types for lexing, parsing and output]--
 export type Token = {
-	Type:						TokenEnum,
+	Type:						number,
+	Offset:					number?,
 	Column:					ColumnNumber,
 	ColumnLiteral:	number
 }
