@@ -3,16 +3,44 @@
 local Types = {}
 
 --[Types for readability]--
-type ColumnNumber		= number
-type RowNumber			= number
-type MetadataEnum		= number
-type TokenEnum			= number
-type SegmentEnum		= number
 type FolderOfImages	= Folder
+
+export type ColumnNumber		= number
+export type RowNumber			= number
+
+
+export type MetadataEnum = {
+	Function: number,
+	Event: number,
+	Image: number,
+	ImageSequence: number
+}
+
+export type TokenEnum = {
+	Text: number,
+	BB_Tag: number,
+	EPBB_Tag: number,
+}
+
+export type SegmentEnum = {
+	Character: number,
+	BB_Open: number,
+	BB_Close: number,
+	EPBB_Open: number,
+	EPBB_Close: number
+}
+
+export type EPBBEnums = {
+	MetadataEnum: MetadataEnum,
+	SegmentEnum: SegmentEnum,
+	TokenEnum: TokenEnum,
+	LexerStateEnum: LexerStateEnum
+}
 
 export type Reason					= string
 export type Success					= boolean
 
+export type RawText					= string
 export type ParsedText			= {Segment}
 export type TokenizedText		= {Token}
 
@@ -23,6 +51,18 @@ export type MetadataMap			= {[MetadataEnum]: Metadata}
 export type ValidFunction		= PTFunction | PTCallback | () -> any
 export type ValidEvent			= BindableEvent | NetworkEvent | PTSignal
 export type ValidMetadata		= BoundImage | BoundImageSequence | BoundEvent | BoundFunction
+
+--[Definitions for the tokenizer]--
+Types.BB_Open				= "["
+Types.BB_Close			= "[/"
+
+Types.EPBB_Open			= "<"
+Types.EPBB_Close		= "</"
+
+Types.Function			= "func"
+Types.Event					= "event"
+Types.Image					= "img"
+Types.ImageSequence = "imgseq"
 
 --[Bound EPBBCode Metadata types]--
 export type BoundImage = {
@@ -54,7 +94,6 @@ export type BoundEvents = {[RowNumber]: {[ColumnNumber]: BoundEvent}}
 export type Token = {
 	Type:						TokenEnum,
 	Column:					ColumnNumber,
-	Row:						RowNumber,
 	ColumnLiteral:	number
 }
 export type Segment = {
@@ -66,6 +105,15 @@ export type Segment = {
 }
 
 --[Lexer Type]--
+export type LexerStateEnum = {
+	Text: number,
+	Offset_Text: number,
+	BB_Open: number,
+	BB_Close: number,
+	EPBB_Open: number,
+	EPBB_Close: number
+}
+
 export type LexerProperties	= {
 	--[Methods]--
 	Tokenize: (RawText: RawText) -> (Success, TokenizedText?, Reason?),
@@ -74,12 +122,8 @@ export type LexerProperties	= {
 --[Parser Type]--
 export type ParserProperties	= {
 	--[Methods]--
-	Parse: (TokenizedText: TokenizedText) -> (Success, ParsedText?, MetadataMap? Reason?),
+	Parse: (TokenizedText: TokenizedText) -> (Success, ParsedText?, MetadataMap?, Reason?),
 }
-
---[EPBBText Property types]--
-export type ParsedText				= {Segment}
-export type RawText						= string
 
 --[EPBBText Type]--
 export type EPBBTextProperties = {
