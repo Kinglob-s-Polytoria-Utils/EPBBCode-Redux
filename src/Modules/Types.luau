@@ -1,9 +1,9 @@
---!strict
-
+--!nocheck
 local Types = {}
 
 --[Types for readability]--
 type FolderOfImages	= Folder
+type Callback = () -> (Success, string?, Reason?)
 
 export type ColumnNumber		= number
 export type RowNumber			= number
@@ -122,7 +122,7 @@ export type LexerProperties	= {
 }
 
 --[Parser Type]--
-export type ParserProperties	= {
+export type ParserProperties = {
 	--[Methods]--
 	Parse: (TokenizedText: TokenizedText) -> (Success, ParsedText?, MetadataMap?, Reason?),
 }
@@ -138,17 +138,16 @@ export type EPBBTextProperties = {
 
 	--[Methods]--
 	--[Public]--
-	New:			 (Raw: RawText)																-> (Success, EPBBTextProperties?, Reason?),
-	UpdateRaw: (self: EPBBTextProperties, Raw: RawText)			-> (Success, EPBBTextProperties?, Reason?),
-	Out:			 (self: EPBBTextProperties, Label: UILabel)		-> (CallBack: () -> (Success, string?, Reason?)),
-	Bind:			 (
+	New:		(Raw: RawText)								-> (Success, EPBBTextProperties?, Reason?),
+	UpdateRaw: 	(self: EPBBTextProperties, Raw: RawText)			-> (Success, EPBBTextProperties?, Reason?),
+	Bind:		(
 		self: EPBBTextProperties,
 		Enum: MetadataEnum,
 		Data: ValidMetadata,
 		Name: string,
 		Args: {any}?
-	)																												-> (Success, Reason?)
-
+	)														-> (Success, Reason?),
+	Out: (self: EPBBTextProperties, Label: UILabel) 	-> Callback
 }
 
 return Types
