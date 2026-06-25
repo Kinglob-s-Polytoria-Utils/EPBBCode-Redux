@@ -91,16 +91,18 @@ export type BoundEvent = {
 }
 export type BoundEvents = { [RowNumber]: { [ColumnNumber]: BoundEvent } }
 
---[Custom data types for lexing, parsing and output]--
+--[Custom data types for tokenizing, parsing, and outputting]--
 export type Token = {
 	Type: number,
-	Offset: number?,
 	Column: ColumnNumber,
 	ColumnLiteral: number,
+	Text: string,
+	MetadataType: number?,
+	Offset: number?,
 }
 export type Segment = {
 	Type: SegmentEnum,
-	Text: string,
+	Text: string?,
 	Offset: number?,
 	EPBBType: number?,
 	BindName: string?,

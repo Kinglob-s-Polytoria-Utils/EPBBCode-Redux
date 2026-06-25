@@ -29,15 +29,24 @@ function Lexer.Tokenize(RawText: Types.RawText): (Types.Success, Types.Tokenized
 
 	while Index <= TextLength do
 		local BB_Open_Start: number?, BB_Open_End: number? = RawText:find(Types.BB_Open, Index)
-
+		local BB_Close_Start: number?, BB_Close_End: number? = RawText:find(Types.BB_Close, Index)
 		local EPBB_Open_Start: number?, EPBB_Open_End: number? = RawText:find(Types.EPBB_Open, Index)
+		local EPBB_Close_Start: number?, EPBB_Close_End: number? = RawText:find(Types.EPBB_Close, EPBB_Open_End)
+
+		if EPBB_Open_Start and not EPBB_Close_Start then return false, nil, Reject("Could not find valid EPBB closing tag after finding valid EPBB opening tag.") end
 
 		if Index == BB_Open_Start then
 			State = EPBBEnums.LexerStateEnum.BB_Open
 		elseif Index == EPBB_Open_Start then
 			State = EPBBEnums.LexerStateEnum.EPBB_Open
+		elseif Index > (EPBB_Close_End :: number or BB_Close_End :: number) then
+			State = EPBBEnums.LexerStateEnum.Offset_Text
+		else
+			State = EPBBEnums.LexerStateEnum.Text
 		end
 
+
+		--[REGULAR]--
 		if State == EPBBEnums.LexerStateEnum.Text then
 			TokenizedText[#TokenizedText + 1] = {
 				Type = EPBBEnums.TokenEnum.Text,
@@ -47,16 +56,17 @@ function Lexer.Tokenize(RawText: Types.RawText): (Types.Success, Types.Tokenized
 
 			Index += 1
 			Column += 1
-		elseif State == EPBBEnums.LexerStateEnum.Offset_Text then
-			local BB_Close_Start: number?, BB_Close_End: number? = RawText:find(Types.BB_Close, Index)
 
+		--[OFFSET]--
+		elseif State == EPBBEnums.LexerStateEnum.Offset_Text then
 			local BB_Close_Length: number? = GetLength(BB_Close_Start, BB_Close_End)
 			if typeof(BB_Close_Length) ~= "number" then
-				return false, nil, Reject("BBCode closinging tag was found invalid.")
+				return false, nil, Reject("BBCode closing tag was found invalid.")
 			end
 
 			TokenizedText[#TokenizedText + 1] = {
 				Type = EPBBEnums.TokenEnum.Offset_Text,
+				Text = RawText:sub(Index, Index),
 				Offset = -BB_Close_Length,
 				Column = Column,
 				ColumnLiteral = Index,
@@ -64,23 +74,43 @@ function Lexer.Tokenize(RawText: Types.RawText): (Types.Success, Types.Tokenized
 
 			Column += BB_Close_Length
 			Index += BB_Close_Length
+
+		--[BB OPEN]--
 		elseif State == EPBBEnums.LexerStateEnum.BB_Open then
 			local BB_Open_Length: number? = GetLength(BB_Open_Start, BB_Open_End)
-			if typeof(BB_Open_Length) ~= "number" then
-				return false, nil, Reject("BBCode opening tag was found invalid.")
-			end
+			if typeof(BB_Open_Length) ~= "number" then return false, nil, Reject("BBCode opening tag was found invalid.") end
 
 			TokenizedText[#TokenizedText + 1] = {
 				Type = EPBBEnums.TokenEnum.BB_Tag,
+				Text = RawText:sub(BB_Open_Start :: number, BB_Open_End),
 				Column = Column,
 				ColumnLiteral = Index,
 			} :: Types.Token
 
 			Column += BB_Open_Length
 			Index += BB_Open_Length
+
+		--[BB CLOSE]--
 		elseif State == EPBBEnums.LexerStateEnum.BB_Close then
+			local BB_Close_Length: number? = GetLength(BB_Close_Start, BB_Close_End)
+			if typeof(BB_Close_Length) ~= "number" then return false, nil, Reject("BBCode closing tag was found invalid.") end
+
+			TokenizedText[#TokenizedText + 1] = {
+				Type = EPBBEnums.TokenEnum.BB_Tag,
+				Text = RawText:sub(BB_Close_Start :: number, BB_Close_End),
+				Column = Column,
+				ColumnLiteral = Index
+			} :: Types.Token
+			
+			Column += BB_Close_Length
+			Index += BB_Close_Length
+
+		--[EPBB OPEN]--
 		elseif State == EPBBEnums.LexerStateEnum.EPBB_Open then
+
+		--[EPBB CLOSE]--
 		elseif State == EPBBEnums.LexerStateEnum.EPBB_Close then
+
 		end
 	end
 
