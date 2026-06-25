@@ -3,10 +3,10 @@ local Types = {}
 
 --[Types for readability]--
 type FolderOfImages	= Folder
-type Callback = () -> (Success, string?, Reason?)
 
 export type ColumnNumber		= number
 export type RowNumber			= number
+export type OutputCallback 		= () -> (Success, string?, Reason?)
 
 export type MetadataEnum = {
 	Function: number,
@@ -147,7 +147,7 @@ export type EPBBTextProperties = {
 		Name: string,
 		Args: {any}?
 	)														-> (Success, Reason?),
-	Out: (self: EPBBTextProperties, Label: UILabel) 	-> Callback
+	Out: (self: EPBBTextProperties, Label: UILabel) 	-> OutputCallback
 }
 
 return Types
