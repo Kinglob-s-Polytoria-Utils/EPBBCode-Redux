@@ -34,7 +34,7 @@ export type RawText = string
 export type TokenizedText = { Token }
 
 export type Metadata = BoundFunctions | BoundImages | BoundImageSequences | BoundEvents
-export type MetadataMap = { [MetadataEnum]: Metadata }
+export type MetadataMap = { [number]: Metadata }
 
 --[Types for validity checks]--
 export type ValidFunction = PTFunction | PTCallback | () -> any
@@ -119,9 +119,9 @@ export type EPBBTextProperties = {
 	--[Methods]--
 	--[Public]--
 	New: (Raw: RawText) -> (Success, EPBBTextProperties?, Reason?),
-	UpdateRaw: (self: EPBBTextProperties, Raw: RawText) -> (Success, Reason?),
+	UpdateRaw: (self: EPBBText, Raw: RawText) -> (Success, Reason?),
 	Bind: (
-		self: EPBBTextProperties,
+		self: EPBBText,
 		Enum: MetadataEnum,
 		Data: ValidMetadata,
 		Name: string,
@@ -129,5 +129,10 @@ export type EPBBTextProperties = {
 	) -> (Success, Reason?),
 	Out: (self: EPBBTextProperties, Label: UILabel, Callback: OutputCallback, isTypewriter: boolean?, haveGibberishPretext: boolean?) -> (Success, Reason?)
 }
+
+export type EPBBText = typeof(setmetatable(
+	{} :: EPBBTextProperties,
+	{}
+))
 
 return Types

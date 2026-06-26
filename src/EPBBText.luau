@@ -11,13 +11,8 @@ end
 local EPBBTextClass = {}
 EPBBTextClass.__index = EPBBTextClass
 
-export type EPBBText = typeof(setmetatable(
-	{} :: Types.EPBBTextProperties,
-	EPBBTextClass
-))
-
-function EPBBTextClass.New(Raw: Types.RawText): (Types.Success, EPBBText?, Types.Reason?)
-	local self: EPBBText = setmetatable(
+function EPBBTextClass.New(Raw: Types.RawText): (Types.Success, Types.EPBBText?, Types.Reason?)
+	local self: Types.EPBBText = setmetatable(
 		{} :: Types.EPBBTextProperties, 
 		EPBBTextClass
 	)
@@ -48,7 +43,7 @@ function EPBBTextClass:Bind(
 end
 
 function EPBBTextClass.Out(
-	self: Types.EPBBTextProperties,
+	self: Types.EPBBText,
 	Label: UILabel, 
 	Callback: Types.OutputCallback,
 	isTypewriter: boolean?,
