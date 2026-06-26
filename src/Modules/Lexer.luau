@@ -14,6 +14,24 @@ local function GetLength(Start: number?, End: number?): number?
 	return End - Start + 1
 end
 
+local function GetMetadataEnum(Tag: string): number?
+	if Tag:match(Types.Function) then
+		return EPBBEnums.MetadataEnum.Function
+	elseif Tag:match(Types.Event) then
+		return EPBBEnums.MetadataEnum.Event
+	elseif Tag:match(Types.Image) then
+		return EPBBEnums.MetadataEnum.Image
+	elseif Tag:match(Types.ImageSequence) then
+		return EPBBEnums.MetadataEnum.ImageSequence
+	end
+	
+	return nil, Reject("Failed to get enum from tag '" .. Tag .. "'")
+end
+
+local function GetBoundMetadataName(Tag: string): string?
+	return Tag:match(Types.GrepBoundName)
+end
+
 local Lexer: Types.LexerProperties = {} :: Types.LexerProperties
 
 function Lexer.Tokenize(RawText: Types.RawText): (Types.Success, Types.TokenizedText?, Types.Reason?)
@@ -59,6 +77,7 @@ function Lexer.Tokenize(RawText: Types.RawText): (Types.Success, Types.Tokenized
 
 		--[OFFSET]--
 		elseif State == EPBBEnums.LexerStateEnum.Offset_Text then
+			-- ADD DETECTION FOR FINDING THE EPBB / BB TAG IT'S IN
 			local BB_Close_Length: number? = GetLength(BB_Close_Start, BB_Close_End)
 			if typeof(BB_Close_Length) ~= "number" then
 				return false, nil, Reject("BBCode closing tag was found invalid.")
@@ -107,6 +126,27 @@ function Lexer.Tokenize(RawText: Types.RawText): (Types.Success, Types.Tokenized
 
 		--[EPBB OPEN]--
 		elseif State == EPBBEnums.LexerStateEnum.EPBB_Open then
+			local EPBB_Open_Length: number? = GetLength(EPBB_Open_Start, EPBB_Open_End)
+			if typeof(EPBB_Open_Length) ~= "number" then return false, nil, Reject("EPBBCode opening tag was found invalid.") end
+			
+			local OpenTag: string? = RawText:sub(EPBB_Open_Start :: number, EPBB_Open_End)
+			if typeof(OpenTag) ~= "string" then return false, nil, Reject("EPBBCode opening tag was found to be invalid") end
+			local MetadataType: number? = GetMetadataEnum(OpenTag)
+			local BoundName: string? = GetBoundMetadataName(OpenTag)
+
+			if typeof(MetadataType) ~= "number" then return false, nil, Reject("EPBBCode opening tag '" .. tostring(OpenTag) .. "' was found to not have a valid metadata type.") end
+			if typeof(BoundName) ~= "string" then return false, nil, Reject("EPBBCode opening tag '" .. tostring(OpenTag) .. "' was found to have invalid bound name.") end
+
+			TokenizedText[#TokenizedText + 1] = {
+				Type = EPBBEnums.TokenEnum.EPBB_Tag,
+				MetdataType = MetadataType,
+				Text = RawText:sub(EPBB_Open_Start :: number, EPBB_Open_End),
+				Column = Column,
+				ColumnLiteral = Index
+			} :: Types.Token
+
+			Column += EPBB_Open_Length
+			Index += EPBB_Open_Length
 
 		--[EPBB CLOSE]--
 		elseif State == EPBBEnums.LexerStateEnum.EPBB_Close then

@@ -22,18 +22,8 @@ export type TokenEnum = {
 	EPBB_Tag: number,
 }
 
-export type SegmentEnum = {
-	Text: number,
-	Offset_Text: number,
-	BB_Open: number,
-	BB_Close: number,
-	EPBB_Open: number,
-	EPBB_Close: number,
-}
-
 export type EPBBEnums = {
 	MetadataEnum: MetadataEnum,
-	SegmentEnum: SegmentEnum,
 	TokenEnum: TokenEnum,
 	LexerStateEnum: LexerStateEnum,
 }
@@ -42,7 +32,6 @@ export type Reason = string
 export type Success = boolean
 
 export type RawText = string
-export type ParsedText = { Segment }
 export type TokenizedText = { Token }
 
 export type Metadata = BoundFunctions | BoundImages | BoundImageSequences | BoundEvents
@@ -54,16 +43,18 @@ export type ValidEvent = BindableEvent | NetworkEvent | PTSignal
 export type ValidMetadata = BoundImage | BoundImageSequence | BoundEvent | BoundFunction
 
 --[Definitions for the tokenizer]--
-Types.BB_Open = "[.]"
-Types.BB_Close = "[/.]"
+Types.BB_Open				= "[.]"
+Types.BB_Close			= "[/.]"
 
-Types.EPBB_Open = "<.>"
-Types.EPBB_Close = "</.>"
+Types.EPBB_Open			= "<.>"
+Types.EPBB_Close		= "</.>"
 
-Types.Function = "func"
-Types.Event = "event"
-Types.Image = "img"
+Types.Function			= "func"
+Types.Event					= "event"
+Types.Image					= "img"
 Types.ImageSequence = "imgseq"
+
+Types.GrepBoundName	= "'([^']+)'"
 
 --[Bound EPBBCode Metadata types]--
 export type BoundImage = {
@@ -98,14 +89,8 @@ export type Token = {
 	ColumnLiteral: number,
 	Text: string,
 	MetadataType: number?,
+	BoundName: string?,
 	Offset: number?,
-}
-export type Segment = {
-	Type: SegmentEnum,
-	Text: string?,
-	Offset: number?,
-	EPBBType: number?,
-	BindName: string?,
 }
 
 --[Lexer Type]--
@@ -123,12 +108,6 @@ export type LexerProperties = {
 	Tokenize: (RawText: RawText) -> (Success, TokenizedText?, Reason?),
 }
 
---[Parser Type]--
-export type ParserProperties = {
-	--[Methods]--
-	Parse: (TokenizedText: TokenizedText) -> (Success, ParsedText?, MetadataMap?, Reason?),
-}
-
 --[EPBBText Type]--
 export type EPBBTextProperties = {
 	--[Public]--
@@ -136,7 +115,7 @@ export type EPBBTextProperties = {
 
 	--[Private]--
 	Metadata: MetadataMap,
-	Parsed: ParsedText,
+	Tokens: TokenizedText,
 
 	--[Methods]--
 	--[Public]--
