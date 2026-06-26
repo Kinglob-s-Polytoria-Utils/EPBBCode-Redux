@@ -5,7 +5,7 @@ type FolderOfImages = Folder
 
 export type ColumnNumber = number
 export type RowNumber = number
-export type OutputCallback = () -> (Success, string?, Reason?)
+export type OutputCallback = (string) -> string
 
 export type MetadataEnum = {
 	Function: number,
@@ -115,11 +115,18 @@ export type EPBBTextProperties = {
 	--[Private]--
 	Metadata: MetadataMap,
 	Tokens: TokenizedText,
+	TypewriterDelay: number,
+	Paused: boolean,
 
 	--[Methods]--
 	--[Public]--
-	New: (Raw: RawText) -> (Success, EPBBTextProperties?, Reason?),
+	New: (Raw: RawText, TypewriterDelay: number) -> (Success, EPBBTextProperties?, Reason?),
 	UpdateRaw: (self: EPBBText, Raw: RawText) -> (Success, Reason?),
+	UpdateDelay: (self: EPBBText, TypewriterDelay: number) -> (Success, Reason?),
+
+	Pause: (self: EPBBText) -> (Success, Reason?),
+	Unpause: (self: EPBBText) -> (Success, Reason?),
+
 	Bind: (
 		self: EPBBText,
 		Enum: MetadataEnum,
