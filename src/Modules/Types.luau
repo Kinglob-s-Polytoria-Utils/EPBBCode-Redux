@@ -128,7 +128,7 @@ export type EPBBTextProperties = {
 		Name: string,
 		Args: { any }?
 	) -> (Success, Reason?),
-	Out: (self: EPBBTextProperties, Label: UILabel) -> OutputCallback,
+	Out: (self: EPBBTextProperties, Label: UILabel, isTypewriter: boolean?, haveGibberishPretext: boolean?) -> OutputCallback,
 }
 
 return Types

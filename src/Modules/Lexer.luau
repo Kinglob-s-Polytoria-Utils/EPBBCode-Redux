@@ -78,21 +78,30 @@ function Lexer.Tokenize(RawText: Types.RawText): (Types.Success, Types.Tokenized
 		--[OFFSET]--
 		elseif State == EPBBEnums.LexerStateEnum.Offset_Text then
 			-- ADD DETECTION FOR FINDING THE EPBB / BB TAG IT'S IN
-			local BB_Close_Length: number? = GetLength(BB_Close_Start, BB_Close_End)
-			if typeof(BB_Close_Length) ~= "number" then
-				return false, nil, Reject("BBCode closing tag was found invalid.")
+			local Close_Length: number?
+			local isEPBB: boolean = false
+
+			-- If in EPBB tag
+			if EPBB_Close_Start > Index and (not BB_Close_Start or EPBB_Close_Start < BB_Close_Start) then 
+				Close_Length = GetLength(EPBB_Close_Start, EPBB_Close_End)
+				isEPBB = true
 			end
+
+			-- If in BB tag
+			if BB_Close_Start > Index and (not EPBB_Close_Start or BB_Close_Start < EPBB_Close_Start) then Close_Length = GetLength(BB_Close_Start, BB_Close_End) end
+
+			if typeof(Close_Length) ~= "number" then return false, nil, Reject("BBCode closing tag was found invalid.") end
 
 			TokenizedText[#TokenizedText + 1] = {
 				Type = EPBBEnums.TokenEnum.Offset_Text,
 				Text = RawText:sub(Index, Index),
-				Offset = -BB_Close_Length,
+				Offset = -Close_Length,
 				Column = Column,
 				ColumnLiteral = Index,
 			} :: Types.Token
-
-			Column += BB_Close_Length
-			Index += BB_Close_Length
+			
+			Column += 1
+			Index += 1
 
 		--[BB OPEN]--
 		elseif State == EPBBEnums.LexerStateEnum.BB_Open then
@@ -145,15 +154,20 @@ function Lexer.Tokenize(RawText: Types.RawText): (Types.Success, Types.Tokenized
 				ColumnLiteral = Index
 			} :: Types.Token
 
-			Column += EPBB_Open_Length
+			Column += 0
 			Index += EPBB_Open_Length
 
 		--[EPBB CLOSE]--
 		elseif State == EPBBEnums.LexerStateEnum.EPBB_Close then
+			local EPBB_Close_Length: number? = GetLength(EPBB_Close_Start, EPBB_Close_End)
+			if typeof(EPBB_Close_Length) ~= "number" then return false, nil, Reject("EPBBCode closing tag was found invalid.") end
 
+			Column += 0
+			Index += EPBB_Close_Length
 		end
 	end
 
+	if TokenizedText then return true, TokenizedText end
 	return false, nil, Reject("Failed to tokenize input RawText. Preventing all further operations in this class.")
 end
 
