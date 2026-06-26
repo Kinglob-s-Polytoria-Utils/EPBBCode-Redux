@@ -79,13 +79,9 @@ function Lexer.Tokenize(RawText: Types.RawText): (Types.Success, Types.Tokenized
 		elseif State == EPBBEnums.LexerStateEnum.Offset_Text then
 			-- ADD DETECTION FOR FINDING THE EPBB / BB TAG IT'S IN
 			local Close_Length: number?
-			local isEPBB: boolean = false
 
 			-- If in EPBB tag
-			if EPBB_Close_Start > Index and (not BB_Close_Start or EPBB_Close_Start < BB_Close_Start) then 
-				Close_Length = GetLength(EPBB_Close_Start, EPBB_Close_End)
-				isEPBB = true
-			end
+			if EPBB_Close_Start > Index and (not BB_Close_Start or EPBB_Close_Start < BB_Close_Start) then Close_Length = GetLength(EPBB_Close_Start, EPBB_Close_End) end
 
 			-- If in BB tag
 			if BB_Close_Start > Index and (not EPBB_Close_Start or BB_Close_Start < EPBB_Close_Start) then Close_Length = GetLength(BB_Close_Start, BB_Close_End) end

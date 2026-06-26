@@ -1,4 +1,3 @@
---!nocheck
 local Types = {}
 
 --[Types for readability]--
@@ -120,7 +119,7 @@ export type EPBBTextProperties = {
 	--[Methods]--
 	--[Public]--
 	New: (Raw: RawText) -> (Success, EPBBTextProperties?, Reason?),
-	UpdateRaw: (self: EPBBTextProperties, Raw: RawText) -> (Success, EPBBTextProperties?, Reason?),
+	UpdateRaw: (self: EPBBTextProperties, Raw: RawText) -> (Success, Reason?),
 	Bind: (
 		self: EPBBTextProperties,
 		Enum: MetadataEnum,
@@ -128,7 +127,7 @@ export type EPBBTextProperties = {
 		Name: string,
 		Args: { any }?
 	) -> (Success, Reason?),
-	Out: (self: EPBBTextProperties, Label: UILabel, isTypewriter: boolean?, haveGibberishPretext: boolean?) -> OutputCallback,
+	Out: (self: EPBBTextProperties, Label: UILabel, Callback: OutputCallback, isTypewriter: boolean?, haveGibberishPretext: boolean?) -> (Success, Reason?)
 }
 
 return Types
