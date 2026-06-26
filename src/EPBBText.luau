@@ -8,11 +8,19 @@ local function Reject(Reason: Types.Reason): string
 	return Reason
 end
 
-local EPBBText: Types.EPBBTextProperties = {} :: Types.EPBBTextProperties
-EPBBText.__index = EPBBText
+local EPBBTextClass = {}
+EPBBTextClass.__index = EPBBTextClass
 
-function EPBBText.New(Raw: Types.RawText): (Types.Success, Types.EPBBTextProperties?, Types.Reason?)
-	local self: Types.EPBBTextProperties = setmetatable({}, EPBBText) :: Types.EPBBTextProperties
+export type EPBBText = typeof(setmetatable(
+	{} :: Types.EPBBTextProperties,
+	EPBBTextClass
+))
+
+function EPBBTextClass.New(Raw: Types.RawText): (Types.Success, EPBBText?, Types.Reason?)
+	local self: EPBBText = setmetatable(
+		{} :: Types.EPBBTextProperties, 
+		EPBBTextClass
+	)
 
 	local 
 		TokenizationSuccess: Types.Success,
@@ -20,17 +28,17 @@ function EPBBText.New(Raw: Types.RawText): (Types.Success, Types.EPBBTextPropert
 	= Lexer.Tokenize(Raw)
 	if not TokenizationSuccess then return false, nil, Reject("Failed to tokenize the input raw text.") end
 	
-	self.Raw: Types.RawText = Raw
-	self.Tokens: Types.TokenizedText = TokenizedText
+	self.Raw = Raw :: Types.RawText
+	self.Tokens = TokenizedText :: Types.TokenizedText
 
 	return true, self	
 end
 
-function EPBBText:UpdateRaw(Raw: Types.RawText): (Types.Success, Types.Reason)
+function EPBBTextClass:UpdateRaw(Raw: Types.RawText): (Types.Success, Types.Reason)
 	return false, Reject("Failed to update raw text.")
 end
 
-function EPBBText:Bind(
+function EPBBTextClass:Bind(
 		Enum: Types.MetadataEnum,
 		Data: Types.ValidMetadata,
 		Name: string,
@@ -39,7 +47,7 @@ function EPBBText:Bind(
 	return false, Reject("Failed to bind metadata to EPBBText instance.")
 end
 
-function EPBBText.Out(
+function EPBBTextClass.Out(
 	self: Types.EPBBTextProperties,
 	Label: UILabel, 
 	Callback: Types.OutputCallback,
@@ -61,4 +69,4 @@ function EPBBText.Out(
 	return false, Reject("Ended output process abruptly.")
 end
 
-return EPBBText
+return EPBBTextClass
