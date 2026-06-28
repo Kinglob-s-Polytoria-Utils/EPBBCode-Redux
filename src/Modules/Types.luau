@@ -42,11 +42,11 @@ export type ValidEvent = BindableEvent | NetworkEvent | PTSignal
 export type ValidMetadata = BoundImage | BoundImageSequence | BoundEvent | BoundFunction
 
 --[Definitions for the tokenizer]--
-Types.BB_Open				= "[.]"
-Types.BB_Close			= "[/.]"
+Types.BB_Open    = "%[[^%]]+%]"
+Types.BB_Close   = "%[/[^%]]+%]"
 
-Types.EPBB_Open			= "<.>"
-Types.EPBB_Close		= "</.>"
+Types.EPBB_Open  = "<%[[^%]]*%]>"
+Types.EPBB_Close = "</%[[^%]]*%]>"
 
 Types.Function			= "func"
 Types.Event					= "event"
@@ -136,7 +136,7 @@ export type EPBBTextProperties = {
 		Name: string,
 		Args: { any }?
 	) -> (Success, Reason?),
-	Out: (self: EPBBTextProperties, Label: UILabel, Callback: OutputCallback, isTypewriter: boolean?, haveGibberishPostText: boolean?) -> (Success, Reason?)
+	Out: (self: EPBBTextProperties, Callback: OutputCallback, isTypewriter: boolean?, haveGibberishPostText: boolean?) -> (Success, Reason?)
 }
 
 export type EPBBText = typeof(setmetatable(

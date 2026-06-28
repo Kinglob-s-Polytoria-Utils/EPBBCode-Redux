@@ -1,7 +1,7 @@
 --!strict
-local Types		= require("./Modules/Types.luau")
-local EPBBEnums		= require("./Modules/Enums.luau")
-local Lexer		= require("./Modules/Lexer.luau")
+local Types		= require(script.Types)
+local EPBBEnums		= require(script.EPBBEnums)
+local Lexer		= require(script.Lexer)
 
 local function Reject(Reason: Types.Reason): string
 	print(string.format("[EPBBText]: %s", tostring(Reason)))
@@ -21,8 +21,10 @@ function EPBBTextClass.New(Raw: Types.RawText, TypewriterDelay: number): (Types.
 		TokenizationSuccess: Types.Success,
 		TokenizedText: Types.TokenizedText?
 	= Lexer.Tokenize(Raw)
+
 	if not TokenizationSuccess then return false, nil, Reject("Failed to tokenize the input raw text.") end
-	
+	if not TokenizedText or #TokenizedText < 1 then return false, nil, Reject("TokenizedText is nil or empty.") end
+
 	self.Raw = Raw :: Types.RawText
 	self.Paused = false
 	self.TypewriterDelay = TypewriterDelay :: number
@@ -63,20 +65,21 @@ function EPBBTextClass:HandleMetadata(Enum: number, BoundName: string): (Types.S
 	--return false, Reject("Failed to handle metadata '" .. BoundName .. "'")
 end
 
-function EPBBTextClass.Out(
-	self: Types.EPBBText,
-	Label: UILabel, 
+function EPBBTextClass:Out(
 	Callback: Types.OutputCallback,
 	isTypewriter: boolean?,
 	haveGibberishPostText: boolean?
 ): (Types.Success, Types.Reason?)
+
+	local Tokens: Types.TokenizedText = self.Tokens
 	local shouldWait: boolean = true
 	local OutputString: string = ""
 
 	local OutputThread = coroutine.create(function(): (Types.Success, Types.Reason?)
 		local TokenPos: number = 1
-		while TokenPos < #self.Tokens  do
-			local Token: Types.Token = self.Tokens[TokenPos]
+
+		while TokenPos < #Tokens  do
+			local Token: Types.Token = Tokens[TokenPos]
 
 			if Token.Type == EPBBEnums.TokenEnum.Text then
 				OutputString = OutputString .. Token.Text
@@ -95,7 +98,8 @@ function EPBBTextClass.Out(
 			end
 
 			if Callback then Callback(OutputString) end
-			
+
+			TokenPos += 1
 			coroutine.yield()
 		end
 
