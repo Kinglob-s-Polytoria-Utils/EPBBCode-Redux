@@ -58,25 +58,48 @@ function EPBBTextClass:Bind(
 	return false, Reject("Failed to bind metadata to EPBBText instance.")
 end
 
+function EPBBTextClass:HandleMetadata(Enum: number, BoundName: string): (Types.Success, Types.Reason?)
+	return true
+	--return false, Reject("Failed to handle metadata '" .. BoundName .. "'")
+end
+
 function EPBBTextClass.Out(
 	self: Types.EPBBText,
 	Label: UILabel, 
 	Callback: Types.OutputCallback,
 	isTypewriter: boolean?,
-	haveGibberishPretext: boolean?
+	haveGibberishPostText: boolean?
 ): (Types.Success, Types.Reason?)
 	local shouldWait: boolean = true
 	local OutputString: string = ""
 
-	local OutputThread = coroutine.create(function()
+	local OutputThread = coroutine.create(function(): (Types.Success, Types.Reason?)
 		local TokenPos: number = 1
 		while TokenPos < #self.Tokens  do
 			local Token: Types.Token = self.Tokens[TokenPos]
 
-			-- add token handling here
+			if Token.Type == EPBBEnums.TokenEnum.Text then
+				OutputString = OutputString .. Token.Text
+				shouldWait = true
+			elseif Token.Type == EPBBEnums.TokenEnum.BB_Tag then
+				OutputString = OutputString .. Token.Text
+			elseif Token.Type == EPBBEnums.TokenEnum.Offset_Text then
+				local OutputStringFirst: string = OutputString:sub(1, #OutputString - Token.Offset :: number)
+				local OutputStringSecond: string = OutputString:sub(#OutputStringFirst, -1)
+				OutputString = OutputStringFirst .. Token.Text .. OutputStringSecond
+				shouldWait = true
+			elseif Token.Type == EPBBEnums.TokenEnum.EPBB_Tag then
+				local MetadataSuccess: Types.Success, MetadataReason: Types.Reason? = self:HandleMetadata(Token.MetadataType :: number, Token.BoundName :: string)
+				if not MetadataSuccess then return false, Reject(MetadataReason :: string) end
+				if Token.MetadataType == (EPBBEnums.MetadataEnum.Image or EPBBEnums.MetadataEnum.ImageSequence) then shouldWait = true end
+			end
+
+			if Callback then Callback(OutputString) end
 			
 			coroutine.yield()
 		end
+
+		return true
 	end)
 
 	while true do 
@@ -84,9 +107,10 @@ function EPBBTextClass.Out(
 			while self.Paused do wait(0.1) end
 		end
 
-		if shouldWait then wait(self.TypewriterDelay) end
-
-		if Callback then Callback(OutputString) end
+		if shouldWait then	
+			shouldWait = false
+			wait(self.TypewriterDelay)
+		end
 
 		local ResumeSuccess: Types.Success, ResumeReason: Types.Reason? = coroutine.resume(OutputThread)
 		if not ResumeSuccess then return false, Reject(ResumeReason :: string) end

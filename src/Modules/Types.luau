@@ -127,6 +127,8 @@ export type EPBBTextProperties = {
 	Pause: (self: EPBBText) -> (Success, Reason?),
 	Unpause: (self: EPBBText) -> (Success, Reason?),
 
+	HandleMetadata: (self: EPBBText, Enum: number, BoundName: string) -> (Success, Reason?),
+
 	Bind: (
 		self: EPBBText,
 		Enum: MetadataEnum,
@@ -134,7 +136,7 @@ export type EPBBTextProperties = {
 		Name: string,
 		Args: { any }?
 	) -> (Success, Reason?),
-	Out: (self: EPBBTextProperties, Label: UILabel, Callback: OutputCallback, isTypewriter: boolean?, haveGibberishPretext: boolean?) -> (Success, Reason?)
+	Out: (self: EPBBTextProperties, Label: UILabel, Callback: OutputCallback, isTypewriter: boolean?, haveGibberishPostText: boolean?) -> (Success, Reason?)
 }
 
 export type EPBBText = typeof(setmetatable(
