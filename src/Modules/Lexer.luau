@@ -60,22 +60,22 @@ function Lexer.Tokenize(RawText: Types.RawText): (Types.Success, Types.Tokenized
 
 		if EPBB_Open_Start and not EPBB_Close_Start then return false, nil, Reject("Could not find valid EPBB closing tag after finding valid EPBB opening tag.") end
 
-        State = EPBBEnums.LexerStateEnum.Text
+		State = EPBBEnums.LexerStateEnum.Text
 		if Index == BB_Open_Start then
 			State = EPBBEnums.LexerStateEnum.BB_Open
 		elseif Index == EPBB_Open_Start then
 			State = EPBBEnums.LexerStateEnum.EPBB_Open
 		elseif EPBB_Close_End and Index > EPBB_Close_End :: number then
 			State = EPBBEnums.LexerStateEnum.Offset_Text
-        elseif BB_Close_End and Index > BB_Close_End :: number then
-            State = EPBBEnums.LexerStateEnum.Offset_Text
+		elseif BB_Close_End and Index > BB_Close_End :: number then
+			State = EPBBEnums.LexerStateEnum.Offset_Text
 		end
 
 		--[REGULAR]--
 		if State == EPBBEnums.LexerStateEnum.Text then
 			TokenizedText[#TokenizedText + 1] = {
 				Type = EPBBEnums.TokenEnum.Text,
-                Text = RawText:sub(Index, Index),
+        Text = RawText:sub(Index, Index),
 				Column = Column,
 				ColumnLiteral = Index,
 			} :: Types.Token
