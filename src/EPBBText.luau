@@ -8,16 +8,29 @@ local function Reject(Reason: Types.Reason): string
 	return Reason
 end
 
-local function GetCharacterRow(Column: number, LabelSize: Vector2): number
-	return 0
+local function GetCharacterRowAndLength(Column: number, Label: UILabel): number
+	local UILabelCharacterLength: number = Label.AbsoluteSize.X :: number // Label.FontSize :: number
+	local Row: number = UILabelCharacterLength // Column
+	return UILabelCharacterLength, Row
 end
 
 local function OffsetToRelative(Offset: Vector2): Vector2
-	return Vector2.Zero
+	local ScreenWidth: number, ScreenHeight: number = Input.ScreenWidth, Input.ScreenHeight
+	return Vector2.New(Offset.X / ScreenWidth, Offset.Y / ScreenHeight)
 end
 
 local function GetImagePositionRelative(Column: number, Row: number, Image: UIImage, Label: UILabel): Vector2
-	return Vector2.Zero
+	local CharSize: Vector2 = Vector2.New(
+		Label.AbsoluteSize.X :: number // Label.FontSize :: number,
+		Label.AbsoluteSize.Y :: number // Label.FontSize :: number
+	)
+
+	local ExpectedPositionUnderLabel = Vector2.New(
+		Column * CharSize.X, 
+		Row * CharSize.Y
+	)
+
+	return ExpectedPositionUnderLabel
 end
 
 local EPBBTextClass = {}
