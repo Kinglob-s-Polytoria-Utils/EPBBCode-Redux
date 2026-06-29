@@ -35,6 +35,7 @@ export type TokenizedText = { Token }
 
 export type Metadata = BoundFunctions | BoundImages | BoundImageSequences | BoundEvents
 export type MetadataMap = { [number]: Metadata }
+export type ActiveMetadata = { any }
 
 --[Types for validity checks]--
 export type ValidFunction = PTFunction | PTCallback | () -> any
@@ -57,29 +58,32 @@ Types.GrepBoundName	= "'([^']+)'"
 
 --[Bound EPBBCode Metadata types]--
 export type BoundImage = {
-	Cache: UIImage,
+	Cache: UIImage?,
 	ImageAsset: PTImageAsset?,
 }
-export type BoundImages = { [RowNumber]: { [ColumnNumber]: BoundImage } }
+export type BoundImages = { [string]: BoundImage } }
 
 export type BoundImageSequence = {
 	SequenceData: { PTImageAsset },
 	Images: { UIImage },
+	Delay: number.
 	Cache: FolderOfImages,
 }
-export type BoundImageSequences = { [RowNumber]: { [ColumnNumber]: BoundImageSequence } }
+export type BoundImageSequences = { [string]: BoundImageSequence } }
 
 export type BoundFunction = {
 	Call: ValidFunction,
 	Payload: { any }?,
 }
-export type BoundFunctions = { [RowNumber]: { [ColumnNumber]: BoundFunction } }
+export type BoundFunctions = { [string]: BoundFunction } }
 
 export type BoundEvent = {
 	Event: ValidEvent,
-	isNetwork: boolean,
+	NetworkMessage: NetMessage?,
+	BindableMessage: any,
+	IsNetwork: boolean,
 }
-export type BoundEvents = { [RowNumber]: { [ColumnNumber]: BoundEvent } }
+export type BoundEvents = { [string]: BoundEvent } }
 
 --[Custom data types for tokenizing, parsing, and outputting]--
 export type Token = {
@@ -114,6 +118,7 @@ export type EPBBTextProperties = {
 
 	--[Private]--
 	Metadata: MetadataMap,
+	Active: ActiveMetadata,
 	Tokens: TokenizedText,
 	TypewriterDelay: number,
 	Paused: boolean,
@@ -127,7 +132,8 @@ export type EPBBTextProperties = {
 	Pause: (self: EPBBText) -> (Success, Reason?),
 	Unpause: (self: EPBBText) -> (Success, Reason?),
 
-	HandleMetadata: (self: EPBBText, Enum: number, BoundName: string) -> (Success, Reason?),
+	HandleMetadata: (self: EPBBText, MetadataToken: Types.Token) -> (Success, thread?, Reason?),
+	CleanupMetadata: (self: EPBBText) -> (Success, Reason?),
 
 	Bind: (
 		self: EPBBText,
@@ -136,7 +142,7 @@ export type EPBBTextProperties = {
 		Name: string,
 		Args: { any }?
 	) -> (Success, Reason?),
-	Out: (self: EPBBTextProperties, Callback: OutputCallback, isTypewriter: boolean?, haveGibberishPostText: boolean?) -> (Success, Reason?)
+	Out: (self: EPBBTextProperties, Callback: OutputCallback, isTypewriter: boolean?, haveGibberishPostText: boolean?, Label: UILabel?) -> (Success, Reason?)
 }
 
 export type EPBBText = typeof(setmetatable(
