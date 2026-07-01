@@ -3,35 +3,9 @@ local TypesPath: string = "./Modules/Types.luau"
 local EnumsPath: string = "./Modules/EPBBEnums.luau"
 local LexerPath: string = "./Modules/Lexer.luau"
 
---[Pcalls for requiring because I'm lazy]--
-local TypesSuccess, Types = pcall(require, TypesPath)
-if not TypesSuccess then 
-	TypesSuccess, Types = pcall(require, script.Types)
-	assert(TypesSuccess, "[EPBBText]: Failed to load types module.", 3)
-	Types: typeof(require(script.Types)) = Types
-else
-	Types: typeof(require(TypesPath)) = Types
-end
-
-local EPBBEnumsSuccess, EPBBEnums				= pcall(require, EnumsPath)
-if not EPBBEnumsSuccess then 
-	EPBBEnumsSuccess, EPBBEnums = pcall(require, script.EPBBEnums)
-	assert(TypesSuccess, "[EPBBText]: Failed to load types module.", 3)
-	EPBBEnums: typeof(require(script.EPBBEnums)) = EPBBEnums
-else
-	EPBBEnums: typeof(require(EnumsPath)) = EPBBEnums
-end
-
-local LexerSuccess, Lexer								= pcall(require, LexerPath)
-if not LexerSuccess then 
-	LexerSuccess, Lexer = pcall(require, LexerPath)
-	assert(TypesSuccess, "[EPBBText]: Failed to load types module.", 3)
-	Lexer: typeof(require(script.Lexer)) = Lexer
-else
-	Lexer: typeof(require(LexerPath)) = Lexer
-end
-
-if not LexerSuccess then Lexer					= require(script.Lexer) end
+local Types = if script.Parent then require(script.Types) else require(TypesPath)
+local EPBBEnums = if script.Parent then require(script.EPBBEnums) else require(EnumsPath)
+local Lexer = if script.Parent then require(script.LexerPath) else require(LexerPath)
 
 local function Reject(Reason: Types.Reason): string
 	print(string.format("[EPBBText]: %s", tostring(Reason)))
@@ -130,12 +104,12 @@ function EPBBTextClass:HandleMetadata(MetadataToken: Types.Token, Label: UILabel
 		local Row: number = GetCharacterRow(MetadataToken.Column)
 		local Position: Vector2 = GetImagePositionRelative(MetadataToken.Column, Row, TargetMetadata.Cache, Label)
 		local Image: UIImage = TargetMetadata.Cache:Clone()
-		Image.Position = Position
+		Image.PositionRelative = Position
 		Image.Name = MetadataToken.BoundName
 		Image.Parent = world.PlayerGUI
 		self.ActiveMetadata[#self.ActiveMetadata + 1] = Image
 	elseif Enum == EPBBEnums.MetadataEnum.ImageSequence then
-		-- TODO:	return a thread that switches between each image in order, include this in the output schedular
+		-- TODO:	return a thread that switches between each image in order, include this in the output scheduler
 		--				also add the created thread and all the images to ActiveMetadata for cleanup
 
 	elseif Enum == EPBBEnums.MetadataEnum.Event then
