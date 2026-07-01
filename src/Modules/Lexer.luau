@@ -1,6 +1,25 @@
 --!strict
-local Types = require(script.Parent.Types)
-local EPBBEnums = require(script.Parent.EPBBEnums)
+local TypesPath: string = "./Types.luau"
+local EnumsPath: string = "./EPBBEnums.luau"
+
+--[Pcalls for requiring because I'm lazy]--
+local TypesSuccess, Types = pcall(require, TypesPath)
+if not TypesSuccess then 
+	TypesSuccess, Types = pcall(require, script.Types)
+	assert(TypesSuccess, "[EPBBText]: Failed to load types module.", 3)
+	Types: typeof(require(script.Parent.Types)) = Types
+else
+	Types: typeof(require(TypesPath)) = Types
+end
+
+local EPBBEnumsSuccess, EPBBEnums				= pcall(require, EnumsPath)
+if not EPBBEnumsSuccess then 
+	EPBBEnumsSuccess, EPBBEnums = pcall(require, script.EPBBEnums)
+	assert(TypesSuccess, "[EPBBText]: Failed to load types module.", 3)
+	EPBBEnums: typeof(require(script.Parent.EPBBEnums)) = EPBBEnums
+else
+	EPBBEnums: typeof(require(EnumsPath)) = EPBBEnums
+end
 
 local function Reject(Reason: Types.Reason): Types.Reason
 	print(string.format("[EPBBText > Lexer]: %s", Reason))

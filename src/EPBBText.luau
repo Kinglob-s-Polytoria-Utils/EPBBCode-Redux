@@ -1,7 +1,37 @@
 --!strict
-local Types						= require(script.Types)
-local EPBBEnums				= require(script.EPBBEnums)
-local Lexer						= require(script.Lexer)
+local TypesPath: string = "./Modules/Types.luau"
+local EnumsPath: string = "./Modules/EPBBEnums.luau"
+local LexerPath: string = "./Modules/Lexer.luau.luau"
+
+--[Pcalls for requiring because I'm lazy]--
+local TypesSuccess, Types = pcall(require, TypesPath)
+if not TypesSuccess then 
+	TypesSuccess, Types = pcall(require, script.Types)
+	assert(TypesSuccess, "[EPBBText]: Failed to load types module.", 3)
+	Types: typeof(require(script.Types)) = Types
+else
+	Types: typeof(require(TypesPath)) = Types
+end
+
+local EPBBEnumsSuccess, EPBBEnums				= pcall(require, EnumsPath)
+if not EPBBEnumsSuccess then 
+	EPBBEnumsSuccess, EPBBEnums = pcall(require, script.EPBBEnums)
+	assert(TypesSuccess, "[EPBBText]: Failed to load types module.", 3)
+	EPBBEnums: typeof(require(script.EPBBEnums)) = EPBBEnums
+else
+	EPBBEnums: typeof(require(EnumsPath)) = EPBBEnums
+end
+
+local LexerSuccess, Lexer								= pcall(require, LexerPath)
+if not LexerSuccess then 
+	LexerSuccess, Lexer = pcall(require, LexerPath)
+	assert(TypesSuccess, "[EPBBText]: Failed to load types module.", 3)
+	Lexer: typeof(require(script.Lexer)) = Lexer
+else
+	Lexer: typeof(require(LexerPath)) = Lexer
+end
+
+if not LexerSuccess then Lexer					= require(script.Lexer) end
 
 local function Reject(Reason: Types.Reason): string
 	print(string.format("[EPBBText]: %s", tostring(Reason)))
