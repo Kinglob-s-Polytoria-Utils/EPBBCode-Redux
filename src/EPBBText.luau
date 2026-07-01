@@ -1,7 +1,7 @@
 --!strict
 local TypesPath: string = "./Modules/Types.luau"
 local EnumsPath: string = "./Modules/EPBBEnums.luau"
-local LexerPath: string = "./Modules/Lexer.luau.luau"
+local LexerPath: string = "./Modules/Lexer.luau"
 
 --[Pcalls for requiring because I'm lazy]--
 local TypesSuccess, Types = pcall(require, TypesPath)
