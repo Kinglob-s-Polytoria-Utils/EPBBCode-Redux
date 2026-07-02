@@ -43,11 +43,11 @@ export type ValidEvent = BindableEvent | NetworkEvent | PTSignal
 export type ValidMetadata = BoundImage | BoundImageSequence | BoundEvent | BoundFunction
 
 --[Definitions for the tokenizer]--
-Types.BB_Open    = "%[[^%]]+%]"
-Types.BB_Close   = "%[/[^%]]+%]"
+Types.BB_Open    = "%b[]"
+Types.BB_Close   = "[/*[^>]"
 
-Types.EPBB_Open  = "<%[[^%]]*%]>"
-Types.EPBB_Close = "</%[[^%]]*%]>"
+Types.EPBB_Open  = "<[^</>]*>"
+Types.EPBB_Close = "</[^>]*>"
 
 Types.Function			= "func"
 Types.Event					= "event"
@@ -61,21 +61,21 @@ export type BoundImage = {
 	Cache: UIImage?,
 	ImageAsset: PTImageAsset?,
 }
-export type BoundImages = { [string]: BoundImage } }
+export type BoundImages = { [string]: BoundImage }
 
 export type BoundImageSequence = {
 	SequenceData: { PTImageAsset },
 	Images: { UIImage },
-	Delay: number.
+	Delay: number,
 	Cache: FolderOfImages,
 }
-export type BoundImageSequences = { [string]: BoundImageSequence } }
+export type BoundImageSequences = { [string]: BoundImageSequence }
 
 export type BoundFunction = {
 	Call: ValidFunction,
 	Payload: { any }?,
 }
-export type BoundFunctions = { [string]: BoundFunction } }
+export type BoundFunctions = { [string]: BoundFunction }
 
 export type BoundEvent = {
 	Event: ValidEvent,
@@ -83,7 +83,7 @@ export type BoundEvent = {
 	BindableMessage: any,
 	IsNetwork: boolean,
 }
-export type BoundEvents = { [string]: BoundEvent } }
+export type BoundEvents = { [string]: BoundEvent }
 
 --[Custom data types for tokenizing, parsing, and outputting]--
 export type Token = {

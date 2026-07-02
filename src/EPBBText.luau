@@ -1,18 +1,18 @@
 --!strict
 local TypesPath: string = "./Modules/Types.luau"
-local EnumsPath: string = "./Modules/EPBBEnums.luau"
+local EnumsPath: string = "./Modules/Enums.luau"
 local LexerPath: string = "./Modules/Lexer.luau"
 
 local Types = if script.Parent then require(script.Types) else require(TypesPath)
 local EPBBEnums = if script.Parent then require(script.EPBBEnums) else require(EnumsPath)
-local Lexer = if script.Parent then require(script.LexerPath) else require(LexerPath)
+local Lexer = if script.Parent then require(script.Lexer) else require(LexerPath)
 
 local function Reject(Reason: Types.Reason): string
 	print(string.format("[EPBBText]: %s", tostring(Reason)))
 	return Reason
 end
 
-local function GetCharacterRowAndLength(Column: number, Label: UILabel): number
+local function GetCharacterRowAndLength(Column: number, Label: UILabel): (number, number)
 	local UILabelCharacterLength: number = Label.AbsoluteSize.X :: number // Label.FontSize :: number
 	local Row: number = UILabelCharacterLength // Column
 	return UILabelCharacterLength, Row
@@ -83,36 +83,43 @@ function EPBBTextClass:Unpause(): (Types.Success, Types.Reason?)
 end
 
 function EPBBTextClass:Bind(
-		Enum: Types.MetadataEnum,
+		EPBBEnum: Types.MetadataEnum,
 		Data: Types.ValidMetadata,
 		Name: string,
 		Args: { any }?
-): (Types.Success, Types.Reason)
-	return false, Reject("Failed to bind metadata to EPBBText instance.")
+): (Types.Success, Types.Reason?)
+	if not self.Metadata then self.Metadata = {} end
+	if not self.Metadata[EPBBEnum] then self.Metadata[EPBBEnum] = {} end
+	self.Metadata[EPBBEnum][Name] = {
+		Data = Data,
+		Args = Args
+	}
+
+	return true
 end
 
 function EPBBTextClass:HandleMetadata(MetadataToken: Types.Token, Label: UILabel): (Types.Success, thread?, Types.Reason?)
 	local Metadata: Types.MetadataMap = self.Metadata
-	local Enum: number = MetadataToken.MetadataEnum
-	local MetadataCategory: Types.Metadata = Metadata[Enum]
+	local EPBBEnum: number = MetadataToken.MetadataEnum
+	local MetadataCategory: Types.Metadata = Metadata[EPBBEnum]
 
 	local TargetMetadata: Types.ValidMetadata = MetadataCategory[MetadataToken.BoundName]
 
-	if Enum == EPBBEnums.MetadataEnum.Function then
+	if EPBBEnum == EPBBEnums.MetadataEnum.Function then
 		TargetMetadata.Call(TargetMetadata.Payload or nil)
-	elseif Enum == EPBBEnums.MetadataEnum.Image then
-		local Row: number = GetCharacterRow(MetadataToken.Column)
+	elseif EPBBEnum == EPBBEnums.MetadataEnum.Image then
+		local LabelCharLength: number, Row: number = GetCharacterRowAndLength(MetadataToken.Column, Label)
 		local Position: Vector2 = GetImagePositionRelative(MetadataToken.Column, Row, TargetMetadata.Cache, Label)
 		local Image: UIImage = TargetMetadata.Cache:Clone()
 		Image.PositionRelative = Position
 		Image.Name = MetadataToken.BoundName
 		Image.Parent = world.PlayerGUI
 		self.ActiveMetadata[#self.ActiveMetadata + 1] = Image
-	elseif Enum == EPBBEnums.MetadataEnum.ImageSequence then
+	elseif EPBBEnum == EPBBEnums.MetadataEnum.ImageSequence then
 		-- TODO:	return a thread that switches between each image in order, include this in the output scheduler
 		--				also add the created thread and all the images to ActiveMetadata for cleanup
 
-	elseif Enum == EPBBEnums.MetadataEnum.Event then
+	elseif EPBBEnum == EPBBEnums.MetadataEnum.Event then
 		if TargetMetadata.IsNetwork then 
 			TargetMetadata.Event.InvokeServer(TargetMetadata.NetworkMessage or nil)
 		else
@@ -161,7 +168,7 @@ function EPBBTextClass:Out(
 				OutputString = OutputStringFirst .. Token.Text .. OutputStringSecond
 				shouldWait = true
 			elseif Token.Type == EPBBEnums.TokenEnum.EPBB_Tag then
-				local MetadataSuccess: Types.Success, MetadataReason: Types.Reason? = self:HandleMetadata(Token, UILabel)
+				local MetadataSuccess: Types.Success, MetadataReason: Types.Reason? = self:HandleMetadata(Token, Label)
 				if not MetadataSuccess then return false, Reject(MetadataReason :: string) end
 				if Token.MetadataType == (EPBBEnums.MetadataEnum.Image or EPBBEnums.MetadataEnum.ImageSequence) then shouldWait = true end
 			end

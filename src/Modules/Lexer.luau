@@ -1,6 +1,6 @@
 --!strict
 local TypesPath: string = "./Types.luau"
-local EnumsPath: string = "./EPBBEnums.luau"
+local EnumsPath: string = "./Enums.luau"
 
 local Types = if script.Parent then require(script.Parent.Types) else require(TypesPath)
 local EPBBEnums = if script.Parent then require(script.Parent.EPBBEnums) else require(EnumsPath)
@@ -11,9 +11,7 @@ local function Reject(Reason: Types.Reason): Types.Reason
 end
 
 local function GetLength(Start: number?, End: number?): number?
-	if typeof(Start) ~= "number" or typeof(End) ~= "number" then
-		return nil
-	end
+	if typeof(Start) ~= "number" or typeof(End) ~= "number" then return nil end
 	return End - Start + 1
 end
 
@@ -54,11 +52,11 @@ function Lexer.Tokenize(RawText: Types.RawText): (Types.Success, Types.Tokenized
         if BB_Open_End then
             BB_Close_Start, BB_Close_End = RawText:find(Types.BB_Close, Index)
         end
-		
+
         local EPBB_Open_Start: number?, EPBB_Open_End: number? = RawText:find(Types.EPBB_Open, Index)
-		local EPBB_Close_Start: number?, EPBB_Close_End: number? = RawText:find(Types.EPBB_Close, EPBB_Open_End)
+		local EPBB_Close_Start: number?, EPBB_Close_End: number? = RawText:find(Types.EPBB_Close, Index)
         if EPBB_Close_End then
-            EPBB_Close_Start, EPBB_Close_End = RawText:find(Types.EPBB_Close, EPBB_Open_End)
+            EPBB_Close_Start, EPBB_Close_End = RawText:find(Types.EPBB_Close, Index)
         end
 
 		if EPBB_Open_Start and not EPBB_Close_Start then return false, nil, Reject("Could not find valid EPBB closing tag after finding valid EPBB opening tag.") end
@@ -137,7 +135,7 @@ function Lexer.Tokenize(RawText: Types.RawText): (Types.Success, Types.Tokenized
 				ColumnLiteral = Index
 			} :: Types.Token
 			
-			Column += BB_Close_Length
+			Column += 0
 			Index += BB_Close_Length
 
 		--[EPBB OPEN]--
@@ -156,6 +154,7 @@ function Lexer.Tokenize(RawText: Types.RawText): (Types.Success, Types.Tokenized
 			TokenizedText[#TokenizedText + 1] = {
 				Type = EPBBEnums.TokenEnum.EPBB_Tag,
 				MetdataType = MetadataType,
+				BoundName = BoundName,
 				Text = RawText:sub(EPBB_Open_Start :: number, EPBB_Open_End),
 				Column = Column,
 				ColumnLiteral = Index
@@ -169,7 +168,7 @@ function Lexer.Tokenize(RawText: Types.RawText): (Types.Success, Types.Tokenized
 			local EPBB_Close_Length: number? = GetLength(EPBB_Close_Start, EPBB_Close_End)
 			if typeof(EPBB_Close_Length) ~= "number" then return false, nil, Reject("EPBBCode closing tag was found invalid.") end
 
-			Column += 0
+			Column += EPBB_Close_Length
 			Index += EPBB_Close_Length
 		end
 	end
